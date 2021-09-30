@@ -1,0 +1,390 @@
+<?php require_once("includes/initialize.php"); 
+if(!$session->is_logged_in()){ redirect_to("logout.php");}
+if(!isset($_GET['id']) && isset($_SESSION['set_plan_id']))
+{
+  redirectUrl();
+}	$ward_address=WardWiseAddress();
+	$address= getAddress();
+	$datas=Costumerassociationdetails::find_by_plan_id($_GET['id']);
+//        print_r($datas);exit;
+	$worker=Moreplandetails::find_by_plan_id($_GET['id']);
+	$rules_result = Rule::find_by_plan_id($_GET['id']);
+	$base_url = get_base_url(1);
+$print_date = PrintDetails::get_max_date($base_url,$_GET['id']);
+$max_date   = DateEngToNep($print_date);
+	
+	?>
+   <?php $data1=  Plandetails1::find_by_id($_GET['id']);?>
+                     <?php $data=  Plandetails1::find_by_id($_GET['id']);
+
+                            $fiscal = FiscalYear::find_by_id($data->fiscal_id);
+							
+                        ?>
+<?php include("menuincludes/header.php"); ?>
+<!-- js ends -->
+<title>योजना संझौता फाराम print page:: <?php echo SITE_SUBHEADING;?></title>
+
+</head>
+
+<body>
+    <?php include("menuincludes/topwrap.php"); ?>
+    <div id="body_wrap_inner"> 
+    	
+                <div class="maincontent">
+                    <h2 class="headinguserprofile">योजना संझौता फाराम | <a href="letters_select.php" class="btn">पछि जानुहोस </a></h2>
+                   
+                    <div class="OurContentFull">
+                    	<form method="get" action="print_bank_report02_final.php?>" target="_blank" >
+                        <div class="myPrint"><input type="hidden" name="id" value="<?=$_GET['id']?>" /><input type="submit" value="प्रिन्ट गर्नुहोस" name="submit" /></div>
+                        <div class="userprofiletable">
+                        	<div class="printPage">
+                                    
+									<div class="printlogo"><img src="images/emblem_nepal.png" alt="Logo"></div>
+									<h1 class="margin1em letter_title_one"><?php echo SITE_LOCATION;?></h1>
+									<h4 class="margin1em letter_title_two"><?php echo $address;?></h4>
+									<h5 class="margin1em letter_title_three"><?php echo $ward_address;?> </h5>
+									<div class="myspacer"></div>
+									<div class="printContent">
+                                         <div class="mydate">मिति :<input type="text" name="date_selected" value="<?php 
+                                                                                                    if(!empty($print_date)){echo $max_date;
+                                                                                                    }else{ echo generateCurrDate();}?>" id="nepaliDate5" /></form></div>
+                                        <div class="patrano">आर्थिक वर्ष : <?php echo convertedcit($fiscal->year); ?></div>
+										<div class="patrano"> योजना दर्ता नं : <?php echo convertedcit($_GET['id']) ?>	</div>
+                                       
+                                        <div class="myspacer"></div>
+										
+										<div class="banktextdetails1">
+                                        	<h4>योजना संझौता फाराम</h4>
+                                              <div class="mycontent" >
+                     <table class="table table-bordered table-responsive">
+                                        
+                                      <tr>
+                                            <td class="myWidth50 myTextalignRight ">योजनाको नाम :</td>
+                                            <td><?php echo $data->program_name;?></td>
+                                          </tr>
+                                      <tr>
+                                      <tr>
+                                            <td class="myTextalignRight">आयोजना सचालन हुने स्थान / वार्ड नं :</td>
+                                            <td><?php echo SITE_LOCATION;?>- <?php echo convertedcit($data->ward_no);?></td>
+                                          </tr>
+                                      <tr>
+                                                <td class="myTextalignRight">योजनाको बिषयगत क्षेत्रको नाम :</td>
+                                                <td><?php echo Topicarea::getName($data->topic_area_id); ?></td>
+                                          </tr>
+                                           <tr>
+                                               <td class="myTextalignRight">योजनाको  शिर्षकगत नाम </td>
+                                               <td ><?php echo Topicareatype::getName($data->topic_area_type_id); ?></td>
+                                           </tr>
+                                           <tr>
+                                               <td class="myTextalignRight">योजनाको  उपशिर्षकगत नाम</td>
+                                               <td><?php echo Topicareatypesub::getName($data->topic_area_type_sub_id); ?></td>
+                                           </tr>                                       
+                                           <tr>
+                                               <td class="myTextalignRight">योजनाको अनुदानको किसिम</td>
+                                               <td><?php echo Topicareaagreement::getName($data->topic_area_agreement_id); ?></td>
+                                          </tr> 
+                                          <tr>
+                                               <td class="myTextalignRight">योजनाको विनियोजन किसिम</td>
+                                               <td><?php echo Topicareainvestment::getName($data->topic_area_agreement_id); ?></td>
+                                          </tr>
+                                          
+                                           
+                                           
+                                           <tr>
+                                            <td class="myTextalignRight">अनुदान रु</td>
+                                            <td>रु. <?php echo convertedcit($data->investment_amount);?></td>
+                                           </tr>
+                       </table>
+                     </div>
+                                                <?php $data=Plantotalinvestment::find_by_plan_id($data->id);
+                                                if(empty($data))
+                                                {?>
+                                                  <h4> योजनाको कुल लागत अनुमान भरिएको छैन</h4>
+                                                  
+                                                <?php exit; }
+                                                else
+                                                {
+                                                ?>
+                                              <h4> योजनाको कुल लागत अनुमान </h4>
+                                              <div class="mycontent" >
+                                                  <table class="table table-bordered table-responsive">
+                                                    <?php 
+                                                       
+                                                        $unit = Units::find_by_id($data->unit_id);
+                                                    ?>
+                                                     <tr>
+                                                        <td class="myWidth50 myTextalignRight">भौतिक ईकाईको  परिणाम</td>
+                                                        <td><?=convertedcit($data->unit_total)?> <?=$unit->name?></td>
+                                                      <tr>
+                                                      <td class="myTextalignRight"><?php echo SITE_TYPE;?>बाट अनुदान</td>
+                                                      <td>रु.  <?php echo convertedcit($data->agreement_gauplaika);?></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td class="myTextalignRight">अन्य निकायबाट प्राप्त अनुदान</td>
+                                                      <td>रु. <?php echo convertedcit($data->agreement_other);?></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td class="myTextalignRight">उपभोक्ताबाट नगद साझेदारी</td>
+                                                      <td>रु. <?php echo convertedcit($data->costumer_agreement);?></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td class="myTextalignRight">अन्य साझेदारी</td>
+                                                      <td>रु. <?php echo convertedcit($data->other_agreement);?></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td class="myTextalignRight">उपभोक्ताबाट जनश्रमदान</td>
+                                                      <td>रु. <?php echo convertedcit($data->costumer_investment);?></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td class="myTextalignRight">कुल लागत अनुमान जम्मा </td>
+                                                      <td>रु. <?php echo convertedcit($data->total_investment);?></td>
+                                                    </tr>
+                                                   
+                                                  </table>
+                                                </div>
+                                                <?php } ?>
+                                              <?php 
+                                              $data2=Costumerassociationdetails0::find_by_plan_id($_GET['id']);
+                                              if(empty($data2)){?>
+                                                  <h4>उपभोक्ता समिति  सम्बन्धी विवरण भरिएको छैन </h4>
+                                             <?php
+                                              }
+                                              else
+                                              {
+                                              ?>
+                                              <h4>उपभोक्ता समिति  सम्बन्धी विवरण </h4>
+                                              <div class="mycontent">
+                                                    <table class="table table-bordered table-responsive">
+                                                        <?php 
+                                                        $data3=Costumerassociationdetails::find_by_plan_id($_GET['id']);?>
+                                                        <tr>
+                                                            <td> योजनाको संचालन गर्ने उपभोक्ता समितिको नाम:<u><?php echo $data2->program_organizer_group_name;?> </u></td>  
+</tr> 
+                                                            
+<tr>
+<td>योजनाको संचालन गर्ने उपभोक्ता समितिको ठेगाना: <u> <?php echo SITE_NAME. convertedcit($data2->program_organizer_group_address);?></u></td>
+                                                    </tr>
+                                                    </table>
+                                                    <table class="table table-bordered table-responsive">
+                                                        <tr>
+                                                            <td class="myCenter">सि.नं.</td>
+                                                            <td class="myCenter">पद</td>
+                                                            <td class="myCenter">नामथर</td>
+                                                            <td class="myCenter">ठेगाना</td>
+                                                            <td class="myCenter">लिगं</td>
+                                                            <td class="myCenter">नागरिकता नं</td>
+                                                            <td class="myCenter">जारी जिल्ला</td>
+                                                            <td class="myCenter">मोबाइल नं</td>
+                                                        </tr>
+                                                     <?php $i=1;foreach($data3 as $data):
+                                                         if($data->gender==1){
+                                                             $gender="पुरुष ";
+                                                         }
+                                                         elseif($data->gender==2)
+                                                         {
+                                                              $gender="महिला";
+                                                         }
+?>
+                                                        <tr>
+                                                            <td ><?php echo convertedcit($i);?></td>
+                                                            <td><?php echo Postname::getName($data->post_id);?> </td>
+                                                            <td><?php echo $data->name;?></td>
+                                                            <td><?php echo SITE_NAME.convertedcit($data->address);?></td>
+                                                             <td><?php echo $gender;?> </td>
+                                                            <td><?php echo convertedcit($data->cit_no);?></td>
+                                                            <td><?php echo $data->issued_district;?></td>
+                                                            <td><?php echo convertedcit($data->mobile_no);?></td>
+                                                        </tr>
+                                                        <?php $i++; endforeach;?>
+                                                    </table>
+                                                </div>
+                                              <?php } ?>
+                                               <?php $data4=  Investigationassociationdetails::find_by_plan_id($_GET['id']);
+                                               if(empty($data4)){?>
+                                              <h4>अनुगमन समिति सम्बन्धी विवरण भरिएको छैन</h4>
+                                               <?php } else {?>
+                                              <h4>अनुगमन समिति सम्बन्धी विवरण</h4>
+                                              <div class="mycontent">
+                                                    <table class="table table-bordered table-responsive">
+                                                        <?php $data4=  Investigationassociationdetails::find_by_plan_id($_GET['id']);?>
+                                                        <tr>
+                                                            <td class="myCenter" ><strong>सि.नं</strong>.</td>
+                                                            <td class="myCenter"><strong>पद</strong></td>
+                                                            <td class="myCenter"><strong>नामथर</strong></td>
+                                                            <td class="myCenter"><strong>ठेगाना</strong></td>
+                                                            <td class="myCenter"><strong>लिगं</strong></td>
+                                                            <td class="myCenter"><strong>मोबाइल नं</strong></td>                                    
+                                                        </tr>
+                                                 <?php $i=1;foreach($data4 as $data):
+                                                     if($data->gender==1){
+                                                             $gender="पुरुष ";
+                                                         }
+                                                         elseif($data->gender==2)
+                                                         {
+                                                              $gender="महिला";
+                                                         }?>
+                                                        <tr>
+                                                            <td class="myCenter"><?php echo convertedcit($i);?></td>
+                                                            <td class="myCenter"><?php echo Postname::getName($data->post_id);?></td>
+                                                            <td class="myCenter"><?php echo $data->name;?></td>
+                                                            <td class="myCenter"><?php echo SITE_NAME.convertedcit($data->address);?></td>
+                                                             <td class="myCenter"><?php echo $gender;?> </td>
+                                                            <td class="myCenter"><?php echo convertedcit($data->mobile_no);?></td>
+                                                         </tr>
+                                                         <?php endforeach; ?>
+                                                    </table>
+                                                </div>
+                                              <?php }?>
+                                              <?php $data= Moreplandetails::find_by_plan_id($_GET['id']); 
+                                              if(empty($data)){?>
+                                                <h4 >योजना सम्बन्धी अन्य विवरण भरिएको छैन</h4>
+                                              <?php }else{?>
+                                              <h4 >योजना सम्बन्धी अन्य विवरण</h4>
+                                              <div class="mycontent">
+                                                  <table class="table table-bordered table-responsive">
+                                                      <?php $data= Moreplandetails::find_by_plan_id($_GET['id']); ?>
+                                                      <tr>
+                                                            <td class=" myWidth50 myTextalignRight">उपभोक्ता समिति गठन भएको मिति</td>
+                                                            <td ><?php echo convertedcit($data->samiti_gathan_date);?></td>
+                                                          </tr>
+                                                          <tr>
+                                                            <td class="myTextalignRight">उपभोक्ता भेलामा उपस्थिति संख्या</td>
+                                                            <td><?php echo convertedcit($data->costumer_total_population);?></td>
+                                                          </tr>
+                                                          <tr>
+                                                            <td class="myTextalignRight">योजना शुरु हुने मिति</td>
+                                                            <td><?php echo convertedcit($data->yojana_start_date);?></td>
+                                                          </tr>
+                                                          <tr>
+                                                            <td class="myTextalignRight">योजना सम्पन्न हुने मिति</td>
+                                                            <td><?php echo convertedcit($data->yojana_sakine_date);?></td>
+                                                          </tr>
+                                                          
+                                                   </table>
+                                                   </div>
+                            <h3 > योजनाबाट लाभान्वित घरधुरी तथा परिवारको विवरण </h3>
+                          <table class="table table-bordered table-responsive">
+                                <tr>
+                                 <td colspan="5" class="myCenter">लाभान्वित जनसंख्या</td>
+                                </tr>
+                                <tr>
+                                	
+                                        <td class="myCenter">घर परिवार संख्या</td>
+                                      <td class="myCenter">महिला</td>
+                                      <td class="myCenter">पुरुष</td>
+                                      <td class="myCenter">जम्मा</td>
+                                    </tr>
+                                    <?php $data= Profitablefamilydetails::find_by_type_id(0,$_GET['id']);?>
+                                 <tr>
+
+                                      <td class="myCenter"><?php echo convertedcit($data->pariwar_population);?></td>
+                                     <td class="myCenter"><?php echo convertedcit($data->female);?></td>
+                                      <td class="myCenter"><?php echo convertedcit($data->male);?></td>
+                                      <td class="myCenter"><?php echo convertedcit($data->total);?></td>
+                                  </tr>
+                          </table>
+                                              <?php }?>
+                             </div>
+                            </div><!-- yojana ends -->
+<div class="" style="margin-left:5px;">
+   <h4>सम्झौताका शर्तहरु</h4>
+    <ul>
+        <li>सम्झौतामा उल्लेख भएको म्याद भित्र उपभोक्ता समितिले योजना सम्पन्न गरिसक्नु पर्ने छ । कुनै कारणवश योजना सम्पन्न हुन नसकेमा सम्पन्न हुन नसक्नुको कारण सहित म्याद सकिने अबधि भन्दा ७ दिन अगाबै उपभोक्ता समितलिे सम्बन्धित स्थानिय तहमा निबेदन दिनु पर्नेछ ।निबेदन प्राप्त भएपछि औचित्यको आधारमा निर्णय गरी सम्झौताको म्याद थप गर्न सकिनेछ । यसरी म्याद थप नगरी भुक्तानी उपलब्ध हुने छैन ।</li>
+        <li>योजनाको भुक्तानी स्थानीय तहले प्राबिधिक रनिङ बिलको आधारमा किस्ताको रुपमा वा काम सम्पन्न भएपछि उपभोक्ता समितिले खर्चको विवरण मुल समिति र अनुगमन समितिको बैठक बसी  आम्दानी खर्च  सार्बजनिक गरी अनुमोदन गरेपछि मात्र  उपलब्ध गराइने छ ।</li>
+        <li>
+        तोकिएको काम भन्दा कम काम गर्ने वा काम नै नगरी वा वास्तविक काम भन्दा बढी काम गरेको देखाई अथवा कुनै आइटमको सट्टा अर्को आइटमको कार्य पूरा गरेको देखाई लागत अनुमानभन्दा फरक काम गरी  रकम माग्ने उपभोक्ता समितिलाई उक्त रकम भुक्तानी नदिई कालो सूचीमा राखी  कारवाही गरिनेछ ।</li>
+        <li>
+        योजना संग सम्बन्धित प्राप्त नगद⁄जिन्सी उपभोक्ता समितिले सम्बन्धित योजनामा मात्र खर्च गर्नु पर्नेछ र प्राप्त नगद⁄जिन्सीको दुरुपयोग, हिनामिना वा हानी नोक्सानी गरेमा प्रचलित कानुन बमोजिम कारवाही हुनेछ ।</li>
+        <li>
+        उपभोक्ता समितिले काम सम्पन्न गरिसकेपछि बाँकि रहन गएका खप्ने सामानहरु मर्मत सम्भार समिति गठन भएको भए सो समितिलाई र सो नभए सम्बन्धित स्थानीय तहलाई बुझाउनु पर्नेछ । तर मर्मत सम्भार समितिलाई बुझाएको सामानको विवरणको एक प्रति सम्बन्धित <?php echo SITE_TYPE;?>मा बुझाउनु पर्नेछ ।</li>
+        <li>
+        उपभोक्ता समितिले योजनासंग सम्बन्धित विल भर्पाइहरु, डोर हाजिरी फारामहरु, जिन्सी नगदी खाताहरु,समितिको निर्णय पुस्तिका आदि कागजात <?php echo SITE_TYPE;?> वा अन्य सरोकारवाला पदाधिकारीले मागेको बखत उपलब्ध गराउनु पर्ने छ र त्यसको लेखा परीक्षण पनि गराउन सकिनेछ ।</li>
+        <li>
+        योजनाको सार्वजनिक परीक्षण, सुचना पाटी, आम्दानी खर्चको सार्वजनिकरण, तथा अन्य पारदर्शिता सम्बन्धी प्रावधानको पालना गर्नु पर्नेछ।</li>
+        <li>
+        उपभोक्ता समितिले कार्यदेश लिएर लामो समय सम्म योजना संचालन नगर्ने, योजनाको आय व्ययको विवरण दुरुस्त नराखी रकमको दुरुपयोग गरेमा सरकारी बाँकि सरह असुल उपर गरिने छ ।</li>
+        <li>
+        योजना सम्पन्न भएपछि स्थानीय तहबाट जाँच पास गरी फरफारकको प्रमाण पत्र लिनु पर्दछ ।साथै योजना हस्तान्तरण लिई आवश्यक मर्मत संभारको व्यवस्था सम्बन्धित उपभोक्ताहरुले नै गर्नु पर्नेछ।</li>
+        <li>यस संझौतामा उल्लेख नभएका कुराहरु प्रचलित कानुन अनुसार हुनेछ।</li>
+        <li>योजनाको लागि चाहिने आवश्यक कागजात यसै साथ संलग्न गरिएकोछ ।</li>
+        <li>उपभोक्ता समितिको पदाधिकारीहरुको नागरिकताको प्रतिलिपि संलग्न गरेका छौ ।
+    
+        <?php  if(!empty($rules_result)):
+        foreach($rules_result as $data):?>
+    <li> <?=$data->rule?> </li>
+        <?php  endforeach;endif;?>
+</ul><!-- samjhauta list ends -->
+ </div>
+ 
+                                              <h4>माथि उल्लेख भए बमोजिमका शर्तहरु पालना गर्न हामी निम्न पक्षहरु मन्जुर गर्दछौं ।</h4>
+                                              <h4>उपभोक्ता समितिको तर्फबाट </h4>
+                                              <div class="mycontent">
+                                              	<table class="table table-bordered table-responsive">
+                                              	<tr>
+                                                	<th class="myWidth25 text-center">सि. नं</th>
+                                                    <th class="myWidth25 text-center">पद</th>
+                                                    <th class="myWidth25 text-center">नाम/थर</th>
+                                                    <th class="myWidth25 text-center">दस्तखत</th>
+                                                </tr>
+                                                 <?php 
+                                               $data1=Costumerassociationdetails::find_by_post_plan_id(1,$_GET['id']);
+                                                $data2=Costumerassociationdetails::find_by_post_plan_id(3,$_GET['id']);
+                                                $data3=Costumerassociationdetails::find_by_post_plan_id(4,$_GET['id'])
+                                              ?>
+                                               
+                                                <tr>
+                                                    <td><?php echo convertedcit(1);?></td>
+                                                    <td><?php echo Postname::getName(1);?></td>
+                                                    <td><?php echo $data1->name;?></td>
+                                                    <td>&nbsp;</td>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td><?php echo convertedcit(2);?></td>
+                                                    <td><?php echo Postname::getName(3);?></td>
+                                                    <td><?php echo $data2->name;?></td>
+                                                    <td>&nbsp;</td>   
+                                                </tr>
+                                                <td><?php echo convertedcit(3);?></td>
+                                                <td><?php echo Postname::getName(4);?></td>
+                                                    <td><?php echo $data3->name;?></td>
+                                                    <td>&nbsp;</td>   
+                                                
+                                             
+                                                                                              </table>
+                                              </div><!-- upabhokta ends -->
+                                              <h4>स्थानीय तहको तर्फबाट</h4>
+                                              <div class="mycontent">
+                                              	<table class="table table-bordered table-responsive">
+                                                	<tr>
+                                                    	<td class="myWidth25 myCenter">सि.नं</td>
+                                                        <td class="myWidth25 myCenter">पद</td>
+                                                        <td class="myWidth25 myCenter">नामथर</td>
+                                                        <td class="myWidth25 myCenter">दस्तखत</td>
+                                                    </tr>
+                                                    <tr>
+                                                    	<td class="myCenter">१</td>
+                                                         <td class="myCenter"><?php echo $worker->post_id_3;?></td>
+                                                       <td class="myCenter"><?php echo Workerdetails::getName($worker->samjhauta_party);?></td>
+                                                        <td class="myCenter">&nbsp;</td>
+                                                    </tr>
+                                                    <tr>
+                                                    	<td colspan="2" class="text-right">मिति</td>
+                                                        <td colspan="2"><?php echo convertedcit(generateCurrDate()); ?></td>
+                                                    </tr>
+                                                </table>
+                                              </div>
+                                              
+											
+										</div><!-- bank details ends -->
+										<div class="myspacer"></div>
+										
+									</div>
+                                <!--<div class="settingsMenu1"><a href="settings_topic_add_sub.php">सह शिर्षक थप्नुहोस +</a></div>-->
+                            </div>
+                        </div>
+                  </div>
+                </div><!-- main menu ends -->
+            </div>
+         </div>   
+    </div><!-- top wrap ends -->
+    <?php include("menuincludes/footer.php"); ?>

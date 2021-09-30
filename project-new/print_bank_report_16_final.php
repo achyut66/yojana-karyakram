@@ -1,0 +1,183 @@
+<?php require_once("includes/initialize.php");
+if(!$session->is_logged_in()){ redirect_to("logout.php");}
+if(!isset($_GET['id']) && isset($_SESSION['set_plan_id']))
+{
+  redirectUrl();
+}
+$date_selected= $_GET['date_selected'];
+?>
+<?php $data1=  Plandetails1::find_by_id($_GET['id']);
+$result = Plantotalinvestment::find_by_plan_id($_GET['id']);
+if(!empty($result))
+   {
+      $data2=  Moreplandetails::find_by_plan_id($_GET['id']);
+       $investment_data=Plantotalinvestment::find_by_plan_id($_GET['id']);
+        $name = "उपभोक्ताबाट";
+
+   }
+   else
+   {
+       $investment_data= AmanatLagat::find_by_plan_id($_GET['id']);
+       $data2= Amanat_more_details::find_by_plan_id($_GET['id']);
+        $name = "";
+
+   }
+$data3=  Costumerassociationdetails0::find_by_plan_id($_GET['id']);
+$fiscal = FiscalYear::find_by_id($data1->fiscal_id); 
+$data4= Analysisbasedwithdraw::getMaxInsallmentByPlanId($_GET['id']);
+$data5=  Analysisbasedwithdraw::find_by_max($data4,$_GET['id']);
+    ?>
+<?php include("menuincludes/header1.php"); ?>
+<!-- js ends -->
+<title>मुल्यांकनको आधारमा भुक्तानीको टिप्पणी । print page:: <?php echo SITE_SUBHEADING;?></title>
+
+</head>
+
+<body>
+    
+    <div class="myPrintFinal" > 
+    	<div class="userprofiletable">
+             <div class="printPage">
+             	<div class="printlogo"><img src="images/janani.png" alt="Logo"></div>
+                                    	<h1 class="marginright1 letter_title_one"><?php echo SITE_LOCATION;?></h1>
+									<h4 class="marginright1 letter_title_two"><?php echo SITE_HEADING;?> </h4>
+									<h5 class="marginright1 letter_title_three"><?php echo SITE_ADDRESS;?></h5>
+                                    
+									<div class="myspacer"></div>
+									
+									<div class="printContent">
+										<div class="mydate">मिति : <?php echo convertedcit($date_selected); ?></div>
+										<div class="patrano">पत्र संख्या : <?php echo convertedcit($fiscal->year); ?></div>
+										<div class="chalanino">योजना दर्ता नं : <?php echo convertedcit($_GET['id'])?></div>
+										<div class="myspacer"></div>
+
+                                        <div class="subject">
+                                            <u>विषय:-
+                                                <?php if(!empty($_GET['subject'])){
+                                                    echo $_GET['subject'];
+                                                }else{
+                                                    echo "भुक्तानी सम्बन्धमा ।";
+                                                }?>
+                                            </u>
+                                        </div>
+										<div class="myspacer"></div>
+										<div class="bankname">श्री आर्थिक प्रशासन शाखा,<br> <?php echo SITE_NAME ?>,धर्मस्थली <!--(योजनाको संचालन गर्ने उपभोक्ता समितिको ठेगाना)--></div>
+                                                                               
+										<div class="banktextdetails"  >
+											 यस कार्यालयको स्वीकृत वार्षिक कार्यक्रम 
+                                                                                         अनुसार मिति <?php echo convertedcit($data2->miti);?><!--(योजना संझौताको मिति)--> मा यस 
+                                                                                         कार्यलय र  <b><u> <?php echo $data3->program_organizer_group_name;?></u></b><!--(योजनाको संचालन गर्ने उपभोक्ता समितिको नाम)-->
+                                                                                         बिच संझौता भई यस <?php echo SITE_TYPE;?>को वडा नं <?php echo convertedcit($data3->program_organizer_group_address);?><!--(योजना संचालन हुने वडा नं)-->  
+                                                                                         मा <b><u><?php echo $data1->program_name;?></u></b><!--(योजनाको नाम)--> योजना संचालनको कार्यदेश दिइएकोमा मिति <?php echo convertedcit($data5->evaluated_date);?><!--(योजनाको काम सम्पन्न भएको 
+                                                                                         मिति)--> को प्राबिधिक मुल्याकन अनुसार तपशिल अनुसारको रकम
+                                                                                        भुक्तानी दिनहुन अनुरोध छ । 
+</div>                         
+										
+                                        
+                                        	<div class="subject">तपशिल</div>
+                                            <table class="table-bordered myWidth100">
+                                               
+    <?php 
+    if($data5->payment_evaluation_count==1)
+    {
+        $period="पहिलो";
+    }
+    if($data5->payment_evaluation_count==2)
+    {
+        $period="दोस्रो";
+    }
+    if($data5->payment_evaluation_count==3)
+    {
+        $period="तेस्रो";
+    }
+     if($data5->payment_evaluation_count==4)
+    {
+        $period="चौथो";
+    }
+     if($data5->payment_evaluation_count==5)
+    {
+        $period="पाचौ";
+    }
+     if($data5->payment_evaluation_count==5)
+    {
+        $period="छैठो";
+    }
+?>
+ <?php   $datas=Plantotalinvestment::find_by_plan_id($_GET['id']);
+                    $add=$datas->agreement_gauplaika+$datas->agreement_other+$datas->costumer_agreement+$datas->other_agreement;?>
+						<tr>
+                                                    <td class="myWidth50 myTextalignRight">बिनियोजन श्रोत र व्याख्या: </td>
+                                                    <td> <?php echo $data1->parishad_sno;?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">बजेट बिनियोजन</td>
+                                                	<td>रु. <?php echo convertedcit($add); ?></td>
+                                                </tr>
+                                                
+                                                <tr>
+                                                    <td  class="myTextalignRight">योजनाको कुल लागत अनुमान : </td>
+                                                    <td> <?php echo convertedcit($investment_data->total_investment);?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td  class="myTextalignRight">कार्यदेश दिएको रकम: </td>
+                                                    <td> <?php echo convertedcit($investment_data->bhuktani_anudan);?></td>
+                                                </tr>
+                                            		<tr>
+                                                	<td  class="myTextalignRight">योजनाको मुल्यांकन किसिम : </td>
+                                                    <td> <?php echo $period;?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">योजनाको मुल्यांकन मिति : </td>
+                                                    <td><?php echo convertedcit($data5->evaluated_date);?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">योजनाको मुल्यांकन रकम : </td>
+                                                    <td><?php echo convertedcit($data5->evaluated_amount);?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">मुल्यांकन अनुसार भुक्तानी दिनु पर्ने कुल  रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->payable_amount);?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">पेश्की भुक्तानी लगेको कट्टी रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->advance_payment);?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">कन्टेन्जेन्सी  कट्टी रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->contengency_amount);?></td>
+                                                </tr>
+                                                 <tr>
+                                                	<td class="myTextalignRight">विपद तथा बातावरण व्यवस्थापन कोष कट्टी रकम :</td>
+                                                	<td>रु.<?php echo convertedcit($data5->disaster_management_amount);?></td>
+                                                </tr>
+                                                
+                                                <tr>
+                                                	<td class="myTextalignRight">मर्मत सम्हार कोष कट्टी रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->renovate_amount);?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">धरौटी कट्टी रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->due_amount);?></td>
+                                                </tr>
+                                               
+                                                <tr>
+                                                	<td class="myTextalignRight">जम्मा कट्टी रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->total_amount_deducted);?></td>
+                                                </tr>
+                                                <tr>
+                                                	<td class="myTextalignRight">हाल भुक्तानी दिनु पर्ने खुद रकम : </td>
+                                                    <td>रु.<?php echo convertedcit($data5->total_paid_amount);?></td>
+                                                </tr>
+                                            
+                                            </table>
+                                        </div>
+										
+										<div class="myspacer30"></div>
+
+										<div class="oursignature"></div>
+										
+										<div style="text-align:left;">
+						  
+</div><!-- print page ends -->
+                            </div><!-- userprofile table ends -->
+                        </div><!-- my print final ends -->

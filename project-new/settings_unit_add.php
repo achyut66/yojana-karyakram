@@ -1,0 +1,46 @@
+<?php require_once("includes/initialize.php");
+if(!$session->is_logged_in()){ redirect_to("logout.php");}?>
+<?php include("menuincludes/header.php"); ?>
+<?php
+if(isset($_POST['submit']))
+{
+    $data=new Units();
+    //  $data->sn= $_POST['sn'];
+    $data->name= $_POST['name'];
+    $data->alias= $_POST['alias'];
+    if($data->save())
+    {
+        $session->message("डाटा सेव भयो ||");
+        redirect_to("settings_unit.php");
+    }
+}
+?>
+    <!-- js ends -->
+    <title>भौतिक ईकाई थप्नुहोस :: <?php echo SITE_SUBHEADING;?></title>
+    </head>
+    <body>
+<?php include("menuincludes/topwrap.php"); ?>
+    <div id="body_wrap_inner">
+        <div class="maincontent">
+            <h2 class="headinguserprofile">भौतिक ईकाई | <a href="settings_unit.php" class="btn">पछि जानुहोस</a></h2>
+            <div class="myMessage"><?php echo $message;?></div>
+            <div class="OurContentFull">
+
+                <div class="userprofiletable">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="inputWrap">
+                            <h1>भौतिक ईकाई</h1>
+                            <div class="titleInput">भौतिक ईकाईको नाम : </div>
+                            <div class="newInput"><input type="text" id="topic_name" name="name" required></div>
+                            <div class="titleInput">भौतिक ईकाईको उपनाम : </div>
+                            <div class="newInput"><input type="text" id="topic_alias" name="alias"></div>
+                            <div class="saveBtn myWidth100"><input type="submit" name="submit" value="सेभ गर्नुहोस" class="btn" ></div>
+                            <div class="myspacer"></div>
+                        </div><!-- input wrap ends -->
+
+                    </form>
+                </div>
+            </div>
+        </div><!-- main menu ends -->
+    </div><!-- top wrap ends -->
+<?php include("menuincludes/footer.php"); ?>
